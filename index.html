@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nét Kanji — Luyện viết mỗi ngày</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <div class="brand-icon">筆</div>
+          <div class="brand-copy">
+            <b>Nét Kanji</b><small>LUYỆN VIẾT MỖI NGÀY</small>
+          </div>
+        </div>
+        <div class="side-label">KHÔNG GIAN HỌC</div>
+        <nav aria-label="Điều hướng chính">
+          <button
+            class="nav active"
+            data-page="practice"
+            aria-label="Luyện tập"
+            title="Luyện tập"
+          >
+            <span aria-hidden="true">▦</span
+            ><span class="nav-label">Luyện tập</span
+            ><i aria-hidden="true">↗</i></button
+          ><button
+            class="nav"
+            data-page="library"
+            aria-label="Thư viện kanji"
+            title="Thư viện kanji"
+          >
+            <span aria-hidden="true">▤</span
+            ><span class="nav-label">Thư viện kanji</span
+            ><em id="navCount">0</em>
+          </button>
+        </nav>
+        <button
+          class="sidebar-toggle"
+          id="sidebarToggle"
+          type="button"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          aria-label="Thu gọn thanh bên"
+          title="Thu gọn thanh bên"
+        >
+          <svg
+            class="sidebar-toggle-icon"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+          >
+            <path d="m12.5 4.5-5.5 5.5 5.5 5.5" />
+          </svg>
+          <span class="sidebar-toggle-label">Thu gọn thanh bên</span>
+        </button>
+        <div class="side-bottom">
+          <p>Chậm một nét,<br />nhớ thêm một chữ.</p>
+          <small>Mỗi ngày một chút, bạn nhé.</small>
+        </div>
+        <div class="side-footer">
+          <span class="avatar">K</span>
+          <div><b>Góc học tập</b><small>Của riêng bạn</small></div>
+          <span>⌄</span>
+        </div>
+      </aside>
+      <main>
+        <header>
+          <div class="breadcrumb">
+            Không gian học <span>/</span> <b id="crumb">Luyện tập</b>
+          </div>
+          <div class="header-right">
+            <span class="today">✦ &nbsp; HỌC MỘT CHÚT MỖI NGÀY</span
+            ><button class="icon-btn" id="helpBtn" title="Hướng dẫn">?</button>
+          </div>
+        </header>
+        <section class="page" id="practicePage">
+          <div class="heading">
+            <div>
+              <div class="eyebrow"><span></span> GÓC LUYỆN TẬP</div>
+              <h1>Hôm nay viết chữ gì?</h1>
+              <p>Nhìn gợi ý, nhớ lại mặt chữ và luyện từng nét nhé.</p>
+            </div>
+            <div class="heading-kanji">練習 <span>REN SHŪ</span></div>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-icon green">▤</div>
+              <div><small>TỔNG SỐ CHỮ</small><b id="totalStat">0</b></div>
+              <span>trong thư viện</span>
+            </div>
+            <div class="stat">
+              <div class="stat-icon orange">◷</div>
+              <div><small>ĐANG HỌC</small><b id="learningStat">0</b></div>
+              <span>chữ cần luyện</span>
+            </div>
+            <div class="stat">
+              <div class="stat-icon blue">✓</div>
+              <div><small>ĐÃ VIẾT ĐƯỢC</small><b id="learnedStat">0</b></div>
+              <span>chữ đã ghi nhớ</span>
+            </div>
+          </div>
+          <div class="progress-panel">
+            <div><b>Hành trình ghi nhớ</b><span id="progressText"></span></div>
+            <div class="progress-track"><div id="progressBar"></div></div>
+            <small>Cứ từng chữ một, bạn đang tiến bộ mỗi ngày.</small>
+          </div>
+          <div class="section-title">
+            <div>
+              <h2>Thẻ luyện tập <span>✦</span></h2>
+              <p>Một chữ ngẫu nhiên dành cho bạn</p>
+            </div>
+            <div class="section-actions">
+              <label class="select-wrap"
+                ><span>CẤP ĐỘ</span
+                ><select id="levelFilter">
+                  <option value="all">Tất cả cấp độ</option>
+                  <option>N5</option>
+                  <option>N4</option>
+                  <option>N3</option>
+                  <option>N2</option>
+                  <option>N1</option>
+                  <option value="none">Chưa phân loại</option>
+                </select></label
+              ><button class="secondary" id="randomBtn">
+                ↻ &nbsp; Chữ khác
+              </button>
+            </div>
+          </div>
+          <div class="practice-grid">
+            <div class="card exercise">
+              <div class="card-top">
+                <span class="card-label"
+                  ><span class="dot"></span> THẺ KANJI</span
+                ><span class="card-counter" id="counter"></span>
+              </div>
+              <div id="exerciseContent"></div>
+            </div>
+            <div class="card writing">
+              <div class="writing-head">
+                <div>
+                  <h3>Bảng tập viết <span>✎</span></h3>
+                  <p>Thử viết chữ vào ô bên dưới</p>
+                </div>
+                <button class="clear-btn" id="clearCanvas">
+                  ↺ &nbsp; Xóa nét
+                </button>
+              </div>
+              <div class="canvas-wrap">
+                <canvas id="canvas" width="600" height="600"></canvas>
+                <div class="canvas-hint" id="canvasHint">
+                  Viết câu trả lời của bạn ở đây <span>↗</span>
+                </div>
+              </div>
+              <div class="writing-foot">
+                <span>✧</span> Không cần hoàn hảo, cứ viết theo cách bạn nhớ.
+              </div>
+            </div>
+          </div>
+          <div class="tip">
+            <span>✦</span>
+            <div>
+              <b>Mẹo nhỏ</b>
+              <p>
+                Hãy thử viết ra trước khi xem đáp án. Việc chủ động nhớ lại sẽ
+                giúp bạn ghi nhớ lâu hơn!
+              </p>
+            </div>
+            <span class="tip-jp">一歩ずつ</span>
+          </div>
+        </section>
+        <section class="page hidden" id="libraryPage">
+          <div class="heading">
+            <div>
+              <div class="eyebrow"><span></span> BỘ SƯU TẬP CỦA BẠN</div>
+              <h1>Thư viện kanji</h1>
+              <p>
+                Quản lý những chữ bạn muốn ghi nhớ, theo cách của riêng bạn.
+              </p>
+            </div>
+            <button class="primary add-top" id="addBtn">
+              ＋ &nbsp; Thêm chữ kanji
+            </button>
+          </div>
+          <div class="library-toolbar">
+            <div class="search">
+              ⌕
+              <input
+                id="search"
+                placeholder="Tìm kanji, âm Hán Việt hoặc nghĩa..."
+              />
+            </div>
+            <select id="libraryLevel">
+              <option value="all">Tất cả cấp độ</option>
+              <option>N5</option>
+              <option>N4</option>
+              <option>N3</option>
+              <option>N2</option>
+              <option>N1</option>
+              <option value="none">Chưa phân loại</option></select
+            ><select id="libraryFilter">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="learning">Đang học</option>
+              <option value="learned">Đã viết được</option></select
+            ><button class="secondary" id="exportBtn">
+              ↓ &nbsp; Xuất dữ liệu</button
+            ><button class="secondary" id="importBtn">
+              ↑ &nbsp; Nhập dữ liệu</button
+            ><input
+              type="file"
+              id="importFile"
+              accept="application/json,.json"
+              hidden
+            />
+          </div>
+          <div class="library-summary">
+            <b>Danh sách chữ</b><span id="listCount"></span>
+          </div>
+          <div class="library-list" id="libraryList"></div>
+          <div class="library-note">
+            ✦ &nbsp; Dữ liệu được lưu trên trình duyệt này. Hãy xuất dữ liệu để
+            sao lưu nhé.<br /><br />Cấp JLPT là mức tham khảo: JLPT không công
+            bố danh sách kanji chính thức. Nghĩa và cách đọc là những mục thông
+            dụng, không phải toàn bộ.<br />N5/N4 theo
+            <a
+              href="https://www.kanshudo.com/collections/jlpt_kanji"
+              target="_blank"
+              rel="noopener"
+              >Kanshudo</a
+            >; âm Hán Việt và nghĩa bổ sung từ
+            <a
+              href="https://github.com/thuandaohong/kanjikana"
+              target="_blank"
+              rel="noopener"
+              >Kanjiba</a
+            >
+            và KANJIDIC2 (CC BY-SA 4.0). Nghĩa tiếng Việt từ Kanjiba được dịch
+            có hỗ trợ AI; bạn có thể chỉnh sửa khi cần.
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="modal hidden" id="modal">
+      <div class="modal-box">
+        <div class="modal-head">
+          <div>
+            <div class="eyebrow"><span></span> THƯ VIỆN KANJI</div>
+            <h2 id="modalTitle">Thêm chữ kanji</h2>
+          </div>
+          <button class="icon-btn" id="closeModal">×</button>
+        </div>
+        <form id="kanjiForm">
+          <input type="hidden" id="editId" />
+          <div class="form-grid">
+            <label
+              >Chữ kanji <span>*</span
+              ><input
+                id="kanjiInput"
+                required
+                maxlength="2"
+                placeholder="例: 日" /></label
+            ><label
+              >Cấp độ JLPT (tham khảo)<select id="jlptInput">
+                <option value="">Chưa phân loại</option>
+                <option>N5</option>
+                <option>N4</option>
+                <option>N3</option>
+                <option>N2</option>
+                <option>N1</option>
+              </select></label
+            ><label
+              >Âm Hán Việt <span>*</span
+              ><input id="hanInput" required placeholder="Ví dụ: NHẬT" /></label
+            ><label
+              >Nghĩa <span>*</span
+              ><input
+                id="meaningInput"
+                required
+                placeholder="Ví dụ: Mặt trời, ngày" /></label
+            ><label class="full"
+              >Cách đọc (tùy chọn)<input
+                id="readingInput"
+                placeholder="Ví dụ: ニチ、ひ"
+            /></label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="secondary" id="cancelModal">Hủy</button
+            ><button class="primary" type="submit">
+              Lưu chữ kanji &nbsp; →
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal hidden" id="helpModal">
+      <div class="modal-box help-box">
+        <div class="modal-head">
+          <div>
+            <div class="eyebrow"><span></span> BẮT ĐẦU TỪ ĐÂY</div>
+            <h2>Học theo nhịp của bạn</h2>
+          </div>
+          <button class="icon-btn" id="closeHelp">×</button>
+        </div>
+        <p>① Nhìn âm Hán Việt và nghĩa, rồi thử viết chữ vào bảng tập viết.</p>
+        <p>
+          ② Bấm <b>Đã viết được</b> để xem đáp án và hướng dẫn nét. Chữ này sẽ
+          tạm rời khỏi lượt chọn ngẫu nhiên.
+        </p>
+        <p>
+          ③ Muốn ôn lại? Vào <b>Thư viện kanji</b> và chọn <b>Học lại</b>. Bạn
+          cũng có thể thêm, sửa và sao lưu danh sách tại đây.
+        </p>
+        <p class="small-note">
+          Hướng dẫn nét sử dụng dữ liệu KanjiVG và cần kết nối internet. Không
+          phải chữ nào cũng có dữ liệu.
+        </p>
+        <button class="primary" id="gotIt">Đã hiểu &nbsp; →</button>
+      </div>
+    </div>
+    <div id="toast"></div>
+    <script src="kanshudo-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
