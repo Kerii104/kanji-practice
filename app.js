@@ -1,6 +1,7 @@
 // 1. Khởi tạo dữ liệu và cập nhật danh sách cũ khi cần
 const key = "net-kanji-v1";
 const kanshudoMigration = "net-kanji-kanshudo-n5n4-v1";
+const n3Migration = "net-kanji-kanshudo-n3-v1";
 
 function createKanji([kanji, jlpt, han, meaning, reading]) {
   return {
@@ -26,11 +27,12 @@ if (!Array.isArray(items)) {
   items = kanshudoSeed.map(createKanji);
   localStorage.setItem(key, JSON.stringify(items));
   localStorage.setItem(kanshudoMigration, "1");
+  localStorage.setItem(n3Migration, "1");
 } else if (!localStorage.getItem(kanshudoMigration)) {
   // Dữ liệu cũ: chỉ bổ sung chữ còn thiếu và đồng bộ cấp độ một lần.
   // Không ghi đè nội dung tự sửa, ID hay tiến độ học.
   const byChar = new Map(items.map((item) => [item.kanji, item]));
-  for (const row of kanshudoSeed) {
+  for (const row of kanshudoSeed.filter((row) => row[1] !== "N3")) {
     const existing = byChar.get(row[0]);
     if (existing) {
       existing.jlpt = row[1];
@@ -43,8 +45,21 @@ if (!Array.isArray(items)) {
   localStorage.setItem(key, JSON.stringify(items));
   localStorage.setItem(kanshudoMigration, "1");
 }
+// Thêm N3 một lần; không sửa hoặc khôi phục lại chữ người dùng đã có.
+if (!localStorage.getItem(n3Migration)) {
+  const existing = new Set(items.map((item) => item.kanji));
+  for (const row of kanshudoSeed) {
+    if (row[1] === "N3" && !existing.has(row[0])) {
+      items.push(createKanji(row));
+      existing.add(row[0]);
+    }
+  }
+  localStorage.setItem(key, JSON.stringify(items));
+  localStorage.setItem(n3Migration, "1");
+}
 // 2. Trạng thái phiên học và các hàm tiện ích
 let current = null;
+let answerRevealed = false;
 const $ = (id) => document.getElementById(id);
 const appShell = document.querySelector(".app");
 const sidebarToggle = $("sidebarToggle");
@@ -83,13 +98,42 @@ function toast(s) {
   $("toast").classList.add("show");
   setTimeout(() => $("toast").classList.remove("show"), 2500);
 }
+// Giao diện được lưu riêng, không ảnh hưởng dữ liệu học.
+const themeKey = "net-kanji-theme-v1";
+function setTheme(theme) {
+  const safeTheme = ["green", "purple", "blue"].includes(theme) ? theme : "green";
+  document.documentElement.dataset.theme = safeTheme;
+  $("themeSelect").value = safeTheme;
+  localStorage.setItem(themeKey, safeTheme);
+}
+setTheme(localStorage.getItem(themeKey));
+$("themeSelect").addEventListener("change", (event) => setTheme(event.target.value));
+
 // 3. Chọn chữ ngẫu nhiên và hiển thị thẻ luyện tập
+const levelInputs = [...document.querySelectorAll("#levelFilter input[value]")];
+const levelPreferenceKey = "net-kanji-levels-v1";
+try {
+  const savedLevels = JSON.parse(localStorage.getItem(levelPreferenceKey));
+  if (Array.isArray(savedLevels)) {
+    levelInputs.forEach((input) => { input.checked = savedLevels.includes(input.value); });
+  }
+} catch { /* Dùng mặc định nếu thiết lập cũ không hợp lệ. */ }
+
+function updateLevelSummary() {
+  const selected = levelInputs.filter((input) => input.checked);
+  $("levelAll").checked = selected.length === levelInputs.length;
+  $("levelAll").indeterminate = selected.length > 0 && selected.length < levelInputs.length;
+  $("levelSummary").textContent = selected.length === levelInputs.length
+    ? "Tất cả cấp độ"
+    : selected.length === 0
+      ? "Chưa chọn cấp độ"
+      : selected.map((input) => input.value === "none" ? "Chưa phân loại" : input.value).join(", ");
+}
+updateLevelSummary();
+
 function eligible() {
-  let f = $("levelFilter").value;
-  return items.filter(
-    (x) =>
-      !x.learned && (f === "all" || (f === "none" ? !x.jlpt : x.jlpt === f)),
-  );
+  const levels = new Set(levelInputs.filter((input) => input.checked).map((input) => input.value));
+  return items.filter((item) => !item.learned && levels.has(item.jlpt || "none"));
 }
 function updateStats() {
   $("totalStat").textContent = items.length;
@@ -105,9 +149,19 @@ function updateStats() {
 function random() {
   let pool = eligible();
   if (pool.length > 1) pool = pool.filter((x) => x.id !== current);
+
+  // Không làm mới lại cùng một chữ nếu đây là chữ duy nhất đang chờ.
+  if (pool.length === 1 && pool[0].id === current && answerRevealed) {
+    toast(
+      "Không còn chữ khác đang học. Hãy thêm chữ mới, đổi cấp độ hoặc chọn học lại trong thư viện.",
+    );
+    return;
+  }
+
   current = pool.length
     ? pool[Math.floor(Math.random() * pool.length)].id
     : null;
+  answerRevealed = false;
   clearCanvas();
   renderPractice();
 }
@@ -117,13 +171,26 @@ function renderPractice() {
   $("counter").textContent = eligible().length + " chữ đang chờ";
   if (!item) {
     $("exerciseContent").innerHTML =
-      '<div class="empty">✧<br><b>Không còn chữ nào đang chờ!</b><br>Hãy thêm chữ mới, đổi cấp độ hoặc chọn học lại trong thư viện.</div>';
+      '<div class="empty">✧<br><b>Không có chữ nào đang chờ!</b><br>Hãy chọn cấp độ có chữ đang học, thêm chữ mới hoặc chọn học lại trong thư viện.</div>';
     return;
   }
-  let revealed = item.learned;
+
+  const isLearned = Boolean(item.learned);
+  const isRevealed = isLearned || answerRevealed;
+  const status = isLearned
+    ? "<span>●</span> Đã thêm vào danh sách đã học"
+    : isRevealed
+      ? "◌ &nbsp; Đáp án đã hiện · Chữ vẫn đang học"
+      : "◌ &nbsp; Chữ kanji đang được ẩn";
+  const actions = isLearned
+    ? '<button class="secondary" id="relearn">↺ &nbsp; Học lại chữ này</button>'
+    : isRevealed
+      ? '<button class="primary" id="markLearned">＋ &nbsp; Thêm vào danh sách đã học</button>'
+      : '<button class="primary" id="reveal">✓ &nbsp; Đã viết được &nbsp; · &nbsp; Xem đáp án</button>';
+
   $("exerciseContent").innerHTML =
-    `<div class="kanji-display">${revealed ? `<div class="revealed">${esc(item.kanji)}</div>` : '<div class="mystery">?</div>'}</div>
-      <div class="status">${revealed ? "<span>●</span> Đã viết được · Đáp án của bạn" : "◌ &nbsp; Chữ kanji đang được ẩn"}</div>
+    `<div class="kanji-display">${isRevealed ? `<div class="revealed">${esc(item.kanji)}</div>` : '<div class="mystery">?</div>'}</div>
+      <div class="status">${status}</div>
       <div class="clues">
       <div class="clue"><small>CẤP ĐỘ JLPT</small>
         <b class="badge">${esc(item.jlpt || "—")}</b>
@@ -134,27 +201,36 @@ function renderPractice() {
       <div class="clue"><small>Ý NGHĨA</small>
         <b>${esc(item.meaning)}</b>
       </div></div>
-      <div class="exercise-actions">${revealed ? '<button class="secondary" id="relearn">↺ &nbsp; Học lại chữ này</button><button class="primary" id="next">Chữ tiếp theo &nbsp; →</button>' : '<button class="primary" id="reveal">✓ &nbsp; Đã viết được &nbsp; · &nbsp; Xem đáp án</button>'}</div>${
-        revealed
+      <div class="exercise-actions">${actions}<button class="secondary card-random-btn" id="randomBtn" type="button" title="Chọn một chữ khác đang học">↻ &nbsp; Chữ khác</button></div>${
+        isRevealed
           ? `<div class="stroke-area" id="strokeArea"><b>✎ &nbsp; Thứ tự nét</b><div id="strokeContent">Đang tải hướng dẫn nét...</div>
       <div style="margin-top:8px;color:#9aa99c">Cách đọc: ${esc(item.reading || "Chưa thêm")} · Nguồn: <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener">KanjiVG</a></div></div>`
           : ""
       }`;
-  if (revealed) {
+
+  if (isLearned) {
     $("relearn").onclick = () => {
       item.learned = false;
+      answerRevealed = false;
       save();
       renderPractice();
       toast("Đã đưa chữ trở lại danh sách học");
     };
-    $("next").onclick = random;
-    loadStroke(item);
-  } else
-    $("reveal").onclick = () => {
+  } else if (isRevealed) {
+    $("markLearned").onclick = () => {
       item.learned = true;
       save();
       renderPractice();
+      toast("Đã thêm vào danh sách đã học");
     };
+  } else {
+    $("reveal").onclick = () => {
+      answerRevealed = true;
+      renderPractice();
+    };
+  }
+
+  if (isRevealed) loadStroke(item);
 }
 // 4. Tải SVG thứ tự nét từ KanjiVG
 async function loadStroke(item) {
@@ -238,8 +314,21 @@ function showPage(page) {
 document
   .querySelectorAll(".nav")
   .forEach((n) => (n.onclick = () => showPage(n.dataset.page)));
-$("randomBtn").onclick = random;
-$("levelFilter").onchange = random;
+$("exerciseContent").addEventListener("click", (event) => {
+  if (event.target.closest("#randomBtn")) random();
+});
+$("levelFilter").addEventListener("change", (event) => {
+  if (event.target.id === "levelAll") {
+    levelInputs.forEach((input) => { input.checked = event.target.checked; });
+  }
+  updateLevelSummary();
+  localStorage.setItem(levelPreferenceKey, JSON.stringify(levelInputs.filter((input) => input.checked).map((input) => input.value)));
+  current = null;
+  random();
+});
+document.addEventListener("click", (event) => {
+  if (!$("levelPicker").contains(event.target)) $("levelPicker").open = false;
+});
 $("search").oninput = renderLibrary;
 $("libraryFilter").onchange = renderLibrary;
 $("libraryLevel").onchange = renderLibrary;
@@ -393,6 +482,7 @@ function pos(e) {
   ];
 }
 canvas.onpointerdown = (e) => {
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--theme-accent").trim() || "#315d4b";
   drawing = true;
   canvas.setPointerCapture(e.pointerId);
   let [x, y] = pos(e);

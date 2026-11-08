@@ -73,8 +73,8 @@
             Không gian học <span>/</span> <b id="crumb">Luyện tập</b>
           </div>
           <div class="header-right">
-            <span class="today">✦ &nbsp; HỌC MỘT CHÚT MỖI NGÀY</span
-            ><button class="icon-btn" id="helpBtn" title="Hướng dẫn">?</button>
+            <label class="theme-picker" for="themeSelect"><span>GIAO DIỆN</span><select id="themeSelect" aria-label="Chọn giao diện"><option value="green">Xanh lá</option><option value="purple">Tím nhạt</option><option value="blue">Xanh dương</option></select></label>
+            <button class="icon-btn" id="helpBtn" title="Hướng dẫn">?</button>
           </div>
         </header>
         <section class="page" id="practicePage">
@@ -114,20 +114,19 @@
               <p>Một chữ ngẫu nhiên dành cho bạn</p>
             </div>
             <div class="section-actions">
-              <label class="select-wrap"
-                ><span>CẤP ĐỘ</span
-                ><select id="levelFilter">
-                  <option value="all">Tất cả cấp độ</option>
-                  <option>N5</option>
-                  <option>N4</option>
-                  <option>N3</option>
-                  <option>N2</option>
-                  <option>N1</option>
-                  <option value="none">Chưa phân loại</option>
-                </select></label
-              ><button class="secondary" id="randomBtn">
-                ↻ &nbsp; Chữ khác
-              </button>
+              <details class="level-picker" id="levelPicker">
+                <summary><span>CẤP ĐỘ</span> <b id="levelSummary">Tất cả cấp độ</b> <span aria-hidden="true">⌄</span></summary>
+                <div class="level-menu" id="levelFilter">
+                  <label class="level-all"><input type="checkbox" id="levelAll" checked /> Tất cả cấp độ</label>
+                  <div class="level-divider"></div>
+                  <label><input type="checkbox" value="N5" checked /> N5</label>
+                  <label><input type="checkbox" value="N4" checked /> N4</label>
+                  <label><input type="checkbox" value="N3" checked /> N3</label>
+                  <label><input type="checkbox" value="N2" checked /> N2</label>
+                  <label><input type="checkbox" value="N1" checked /> N1</label>
+                  <label><input type="checkbox" value="none" checked /> Chưa phân loại</label>
+                </div>
+              </details>
             </div>
           </div>
           <div class="practice-grid">
@@ -135,7 +134,10 @@
               <div class="card-top">
                 <span class="card-label"
                   ><span class="dot"></span> THẺ KANJI</span
-                ><span class="card-counter" id="counter"></span>
+                >
+                <div class="card-tools">
+                  <span class="card-counter" id="counter"></span>
+                </div>
               </div>
               <div id="exerciseContent"></div>
             </div>
@@ -145,9 +147,11 @@
                   <h3>Bảng tập viết <span>✎</span></h3>
                   <p>Thử viết chữ vào ô bên dưới</p>
                 </div>
-                <button class="clear-btn" id="clearCanvas">
-                  ↺ &nbsp; Xóa nét
-                </button>
+                <div class="writing-actions">
+                  <button class="clear-btn" id="clearCanvas" type="button">
+                    ↺ &nbsp; Xóa nét
+                  </button>
+                </div>
               </div>
               <div class="canvas-wrap">
                 <canvas id="canvas" width="600" height="600"></canvas>
@@ -224,7 +228,7 @@
             ✦ &nbsp; Dữ liệu được lưu trên trình duyệt này. Hãy xuất dữ liệu để
             sao lưu nhé.<br /><br />Cấp JLPT là mức tham khảo: JLPT không công
             bố danh sách kanji chính thức. Nghĩa và cách đọc là những mục thông
-            dụng, không phải toàn bộ.<br />N5/N4 theo
+            dụng, không phải toàn bộ.<br />N5/N4/N3 theo
             <a
               href="https://www.kanshudo.com/collections/jlpt_kanji"
               target="_blank"
@@ -306,12 +310,13 @@
         </div>
         <p>① Nhìn âm Hán Việt và nghĩa, rồi thử viết chữ vào bảng tập viết.</p>
         <p>
-          ② Bấm <b>Đã viết được</b> để xem đáp án và hướng dẫn nét. Chữ này sẽ
-          tạm rời khỏi lượt chọn ngẫu nhiên.
+          ② Bấm <b>Đã viết được</b> để hiện đáp án và hướng dẫn nét. Thao tác
+          này chỉ mở đáp án; chữ vẫn ở trạng thái đang học.
         </p>
         <p>
-          ③ Muốn ôn lại? Vào <b>Thư viện kanji</b> và chọn <b>Học lại</b>. Bạn
-          cũng có thể thêm, sửa và sao lưu danh sách tại đây.
+          ③ Nếu muốn chuyển chữ vào danh sách đã học, hãy bấm
+          <b>Thêm vào danh sách đã học</b>. Muốn ôn lại chữ đã học? Vào
+          <b>Thư viện kanji</b> và chọn <b>Học lại</b>.
         </p>
         <p class="small-note">
           Hướng dẫn nét sử dụng dữ liệu KanjiVG và cần kết nối internet. Không

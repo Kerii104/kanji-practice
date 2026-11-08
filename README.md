@@ -7,7 +7,7 @@ Website luyện viết kanji bằng HTML, CSS và JavaScript thuần; không c�
 - `index.html`: cấu trúc giao diện, nút và biểu mẫu.
 - `style.css`: phông chữ, màu sắc, bố cục và giao diện trên điện thoại.
 - `app.js`: xử lý dữ liệu, luyện tập, thư viện, nhập/xuất và bảng tập viết. Các phần được đánh số bằng chú thích trong tệp.
-- `kanshudo-data.js`: dữ liệu tham khảo N5 và N4. Mỗi mục có dạng `[kanji, cấp JLPT, âm Hán Việt, nghĩa, cách đọc]`.
+- `kanshudo-data.js`: dữ liệu tham khảo N5, N4 và N3. Mỗi mục có dạng `[kanji, cấp JLPT, âm Hán Việt, nghĩa, cách đọc]`.
 
 Giữ các tệp JavaScript theo đúng thứ tự nạp ở cuối `index.html`: `kanshudo-data.js`, sau đó `app.js`.
 
@@ -21,6 +21,8 @@ python3 -m http.server 3000
 
 Truy cập `http://localhost:3000`. Tải lại trang sau khi sửa tệp. Thứ tự nét KanjiVG và phông chữ trực tuyến cần kết nối internet. Trên màn hình rộng, dùng nút **Thu gọn thanh bên** bên dưới menu để thu/mở sidebar; lựa chọn được ghi nhớ trên trình duyệt.
 
+Trong thẻ luyện tập, **Đã viết được** chỉ hiện đáp án; chữ chỉ chuyển sang danh sách đã học khi bấm **Thêm vào danh sách đã học**. Nút **Chữ khác** nằm ngay cạnh bảng tập viết.
+
 ## Chỉnh sửa thường gặp
 
 - **Chữ và nhãn trên giao diện:** tìm nội dung tương ứng trong `index.html`. Nội dung của thẻ luyện tập và từng dòng thư viện được tạo bằng JavaScript trong `renderPractice()` và `renderLibrary()` của `app.js`.
@@ -31,6 +33,6 @@ Truy cập `http://localhost:3000`. Tải lại trang sau khi sửa tệp. Thứ
 
 ## Nguồn dữ liệu
 
-- Phân loại N5/N4 tham khảo: [Kanshudo](https://www.kanshudo.com/collections/jlpt_kanji); đây không phải danh sách JLPT chính thức.
+- Phân loại N5/N4/N3 tham khảo: [Kanshudo](https://www.kanshudo.com/collections/jlpt_kanji); đây không phải danh sách JLPT chính thức.
 - Âm Hán Việt và nghĩa bổ sung: [Kanjiba](https://github.com/thuandaohong/kanjikana), dựa trên KANJIDIC2; nghĩa tiếng Việt có hỗ trợ AI. Dữ liệu KANJIDIC2 theo CC BY-SA 4.0.
 - Thứ tự nét: [KanjiVG](https://kanjivg.tagaini.net/).
