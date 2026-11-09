@@ -137,6 +137,7 @@
                 >
                 <div class="card-tools">
                   <span class="card-counter" id="counter"></span>
+                  <button class="secondary previous-btn" id="previousBtn" type="button" title="Quay lại chữ vừa xem" disabled>← Chữ trước</button>
                 </div>
               </div>
               <div id="exerciseContent"></div>
@@ -219,6 +220,11 @@
               accept="application/json,.json"
               hidden
             />
+          </div>
+          <div class="undo-notice hidden" id="undoNotice" role="status" aria-live="polite">
+            <span id="undoMessage"></span>
+            <button type="button" id="undoDelete">Hoàn tác</button>
+            <button type="button" id="dismissUndo" aria-label="Đóng thông báo">×</button>
           </div>
           <div class="library-summary">
             <b>Danh sách chữ</b><span id="listCount"></span>

@@ -1250,3 +1250,12 @@ canvas:focus-visible {
 :root[data-theme="purple"] .canvas-wrap, :root[data-theme="blue"] .canvas-wrap { border-color:var(--theme-border); background:linear-gradient(to right,transparent 49.8%,var(--theme-border) 50%,transparent 50.2%),linear-gradient(to bottom,transparent 49.8%,var(--theme-border) 50%,transparent 50.2%),var(--theme-canvas); }
 :root[data-theme="purple"] .stroke-area svg path, :root[data-theme="blue"] .stroke-area svg path { stroke:var(--theme-accent) !important; }
 @media (max-width: 720px) { .theme-picker span { display:none; } .level-menu { left:0; right:auto; } }
+
+/* Điều hướng lịch sử và hoàn tác xóa */
+.card-tools .previous-btn { flex: 0 0 auto; padding: 7px 9px; font-size: 10px; white-space: nowrap; }
+.previous-btn:disabled { opacity: .42; cursor: not-allowed; }
+.undo-notice { display: flex; align-items: center; gap: 12px; margin: -14px 0 20px; padding: 12px 14px; border: 1px solid var(--theme-border, #dbe8dc); background: var(--theme-soft, #eef5ee); color: var(--theme-ink, #466850); border-radius: 8px; font-size: 12px; }
+.undo-notice span { flex: 1; }
+.undo-notice button { border: 0; background: transparent; color: var(--theme-accent, #315d4b); font: inherit; font-weight: 700; cursor: pointer; }
+.undo-notice #dismissUndo { font-size: 18px; line-height: 1; }
+

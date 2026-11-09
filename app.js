@@ -60,6 +60,9 @@ if (!localStorage.getItem(n3Migration)) {
 // 2. Trạng thái phiên học và các hàm tiện ích
 let current = null;
 let answerRevealed = false;
+// Lịch sử chỉ tồn tại trong phiên; không làm thay đổi trạng thái đã học.
+let practiceHistory = [];
+let deletedItems = [];
 const $ = (id) => document.getElementById(id);
 const appShell = document.querySelector(".app");
 const sidebarToggle = $("sidebarToggle");
@@ -148,30 +151,43 @@ function updateStats() {
 }
 function random() {
   let pool = eligible();
-  if (pool.length > 1) pool = pool.filter((x) => x.id !== current);
-
-  // Không làm mới lại cùng một chữ nếu đây là chữ duy nhất đang chờ.
-  if (pool.length === 1 && pool[0].id === current && answerRevealed) {
-    toast(
-      "Không còn chữ khác đang học. Hãy thêm chữ mới, đổi cấp độ hoặc chọn học lại trong thư viện.",
-    );
+  if (pool.length > 1) pool = pool.filter((item) => item.id !== current);
+  if (pool.length === 1 && pool[0].id === current) {
+    toast("Không còn chữ khác đang học. Hãy đổi cấp độ hoặc chọn học lại trong thư viện.");
     return;
   }
-
-  current = pool.length
-    ? pool[Math.floor(Math.random() * pool.length)].id
-    : null;
+  const next = pool.length ? pool[Math.floor(Math.random() * pool.length)].id : null;
+  if (current && current !== next) {
+    practiceHistory.push({ id: current, revealed: answerRevealed });
+    if (practiceHistory.length > 100) practiceHistory.shift();
+  }
+  current = next;
   answerRevealed = false;
   clearCanvas();
   renderPractice();
 }
+
+function previousKanji() {
+  while (practiceHistory.length) {
+    const previous = practiceHistory.pop();
+    if (!items.some((item) => item.id === previous.id)) continue;
+    current = previous.id;
+    answerRevealed = previous.revealed;
+    clearCanvas();
+    renderPractice();
+    return;
+  }
+  renderPractice();
+}
+
 function renderPractice() {
   updateStats();
   let item = items.find((x) => x.id === current);
   $("counter").textContent = eligible().length + " chữ đang chờ";
+  $("previousBtn").disabled = practiceHistory.length === 0;
   if (!item) {
     $("exerciseContent").innerHTML =
-      '<div class="empty">✧<br><b>Không có chữ nào đang chờ!</b><br>Hãy chọn cấp độ có chữ đang học, thêm chữ mới hoặc chọn học lại trong thư viện.</div>';
+      `<div class="empty">✧<br><b>Không có chữ nào đang chờ!</b><br>Hãy chọn cấp độ có chữ đang học, thêm chữ mới hoặc chọn học lại trong thư viện.</div>`;
     return;
   }
 
@@ -220,7 +236,7 @@ function renderPractice() {
     $("markLearned").onclick = () => {
       item.learned = true;
       save();
-      renderPractice();
+      random();
       toast("Đã thêm vào danh sách đã học");
     };
   } else {
@@ -314,6 +330,7 @@ function showPage(page) {
 document
   .querySelectorAll(".nav")
   .forEach((n) => (n.onclick = () => showPage(n.dataset.page)));
+$("previousBtn").addEventListener("click", previousKanji);
 $("exerciseContent").addEventListener("click", (event) => {
   if (event.target.closest("#randomBtn")) random();
 });
@@ -324,6 +341,7 @@ $("levelFilter").addEventListener("change", (event) => {
   updateLevelSummary();
   localStorage.setItem(levelPreferenceKey, JSON.stringify(levelInputs.filter((input) => input.checked).map((input) => input.value)));
   current = null;
+  practiceHistory = [];
   random();
 });
 document.addEventListener("click", (event) => {
@@ -399,11 +417,37 @@ $("libraryList").onclick = (e) => {
     b.dataset.action === "delete" &&
     confirm(`Xóa chữ ${item.kanji} khỏi thư viện?`)
   ) {
-    items = items.filter((x) => x.id !== item.id);
+    const index = items.findIndex((x) => x.id === item.id);
+    deletedItems.push({ item, index });
+    items.splice(index, 1);
     save();
     renderLibrary();
-    toast("Đã xóa chữ kanji");
+    updateUndoNotice();
   }
+};
+// Có thể hoàn tác các lần xóa trong phiên hiện tại, theo thứ tự gần nhất.
+function updateUndoNotice() {
+  const last = deletedItems.at(-1);
+  $("undoNotice").classList.toggle("hidden", !last);
+  if (last) $("undoMessage").textContent = `Đã xóa chữ ${last.item.kanji}${deletedItems.length > 1 ? ` · ${deletedItems.length} chữ có thể khôi phục` : ""}`;
+}
+$("undoDelete").onclick = () => {
+  const last = deletedItems.at(-1);
+  if (!last) return;
+  if (items.some((item) => item.id === last.item.id || item.kanji === last.item.kanji)) {
+    toast("Không thể khôi phục vì chữ này đã có trong thư viện.");
+    return;
+  }
+  deletedItems.pop();
+  items.splice(Math.min(last.index, items.length), 0, last.item);
+  save();
+  renderLibrary();
+  updateUndoNotice();
+  toast("Đã khôi phục chữ kanji và tiến độ học");
+};
+$("dismissUndo").onclick = () => {
+  deletedItems = [];
+  updateUndoNotice();
 };
 // 7. Sao lưu và khôi phục dữ liệu JSON
 $("exportBtn").onclick = () => {
@@ -448,6 +492,9 @@ $("importFile").onchange = async (e) => {
     }));
     save();
     current = null;
+    practiceHistory = [];
+    deletedItems = [];
+    updateUndoNotice();
     renderLibrary();
     toast("Đã nhập dữ liệu");
   } catch {
