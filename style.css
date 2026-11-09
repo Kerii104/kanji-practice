@@ -1259,3 +1259,17 @@ canvas:focus-visible {
 .undo-notice button { border: 0; background: transparent; color: var(--theme-accent, #315d4b); font: inherit; font-weight: 700; cursor: pointer; }
 .undo-notice #dismissUndo { font-size: 18px; line-height: 1; }
 
+
+/* Các nút phụ luôn đi cùng nhau, kể cả khi xuống dòng trên màn hình nhỏ. */
+.exercise-secondary-actions {
+  display: flex;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+.exercise-actions .primary { flex: 1 1 145px; }
+.exercise-actions .hide-kanji-btn {
+  padding: 7px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--theme-ink, #53745d);
+}

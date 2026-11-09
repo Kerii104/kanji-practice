@@ -217,7 +217,7 @@ function renderPractice() {
       <div class="clue"><small>Ý NGHĨA</small>
         <b>${esc(item.meaning)}</b>
       </div></div>
-      <div class="exercise-actions">${actions}<button class="secondary card-random-btn" id="randomBtn" type="button" title="Chọn một chữ khác đang học">↻ &nbsp; Chữ khác</button></div>${
+      <div class="exercise-actions">${actions}<div class="exercise-secondary-actions">${isRevealed && !isLearned ? '<button class="secondary hide-kanji-btn" id="hideKanji" type="button" aria-label="Ẩn lại chữ kanji">Ẩn chữ</button>' : ""}<button class="secondary card-random-btn" id="randomBtn" type="button" title="Chọn một chữ khác đang học">↻ &nbsp; Chữ khác</button></div></div>${
         isRevealed
           ? `<div class="stroke-area" id="strokeArea"><b>✎ &nbsp; Thứ tự nét</b><div id="strokeContent">Đang tải hướng dẫn nét...</div>
       <div style="margin-top:8px;color:#9aa99c">Cách đọc: ${esc(item.reading || "Chưa thêm")} · Nguồn: <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener">KanjiVG</a></div></div>`
@@ -233,6 +233,10 @@ function renderPractice() {
       toast("Đã đưa chữ trở lại danh sách học");
     };
   } else if (isRevealed) {
+    $("hideKanji").onclick = () => {
+      answerRevealed = false;
+      renderPractice();
+    };
     $("markLearned").onclick = () => {
       item.learned = true;
       save();
