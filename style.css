@@ -1273,3 +1273,30 @@ canvas:focus-visible {
   white-space: nowrap;
   color: var(--theme-ink, #53745d);
 }
+.mode-picker { display:flex; align-items:center; gap:8px; min-height:39px; padding:0 10px; background:white; border:1px solid var(--theme-border,#e2e9e2); border-radius:8px; color:var(--theme-muted,#9aa99c); font-size:9px; letter-spacing:.5px; font-weight:700; white-space:nowrap; }
+.mode-picker select { color:var(--theme-ink,#4f6858); font-weight:600; }
+.modal-description { color:#718276; font-size:12px; line-height:1.7; margin:0 0 15px; }
+.trash-list { max-height: min(48vh, 400px); overflow-y:auto; }
+.trash-row { display:flex; align-items:center; gap:6px; padding:10px 0; border-bottom:1px solid var(--theme-border,#e2e9e2); }
+.trash-row span { flex:1; min-width:0; overflow-wrap:anywhere; }
+.trash-row b { font-family:var(--jp); font-size:22px; }
+.storage-conflict { position:fixed; z-index:10; top:12px; left:50%; transform:translateX(-50%); width:min(92%,620px); display:flex; gap:12px; align-items:center; justify-content:space-between; border:1px solid #e8d5a5; background:#fff8e4; color:#705b2d; border-radius:8px; padding:12px 15px; font-size:12px; box-shadow:0 6px 20px #0002; }
+.storage-conflict button { background:#705b2d; color:white; border:0; border-radius:6px; padding:8px 10px; font-weight:700; white-space:nowrap; cursor:pointer; }
+@media(max-width:720px) { .section-actions { flex-wrap:wrap; } .trash-row { flex-wrap:wrap; } .trash-row span { flex-basis:100%; } }
+
+/* Danh sách đang học là nhóm tự chọn, không ảnh hưởng lượt luyện thông thường. */
+.focus-action { margin: 0 0 10px; }
+.focus-toggle { width: 100%; padding: 9px 12px; border: 1px dashed var(--theme-focus, #b8d1bc); border-radius: 7px; background: var(--theme-soft, #f3f8f3); color: var(--theme-ink, #53745d); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.focus-toggle.selected { border-style: solid; }
+.focus-toggle:hover { filter: brightness(.97); }
+.focus-toggle:focus-visible { outline: 3px solid var(--theme-focus, #a8cbb0); outline-offset: 2px; }
+.focus-indicator { color: var(--theme-ink, #53745d) !important; font-weight: 700; }
+
+/* Phân trang để thư viện lớn vẫn dễ sử dụng trên điện thoại. */
+.library-pagination { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.library-pagination span { color: var(--theme-ink, #667e6d); font-size: 12px; }
+.library-pagination button:disabled { opacity: .45; cursor: not-allowed; }
+
+.hard-mode { display:flex; align-items:center; gap:6px; padding:0 10px; min-height:39px; background:#fff; border:1px solid var(--theme-border,#e2e9e2); border-radius:8px; color:var(--theme-ink,#4f6858); font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.hard-mode input { accent-color:var(--theme-accent,#315e4b); }
+.hard-mode span { color:var(--theme-muted,#9aa99c); font-weight:400; }

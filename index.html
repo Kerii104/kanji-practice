@@ -6,7 +6,7 @@
     <title>Nét Kanji — Luyện viết mỗi ngày</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=20261116-4" />
   </head>
   <body>
     <div class="app">
@@ -94,7 +94,7 @@
             </div>
             <div class="stat">
               <div class="stat-icon orange">◷</div>
-              <div><small>ĐANG HỌC</small><b id="learningStat">0</b></div>
+              <div><small>CHƯA THUỘC</small><b id="learningStat">0</b></div>
               <span>chữ cần luyện</span>
             </div>
             <div class="stat">
@@ -106,7 +106,7 @@
           <div class="progress-panel">
             <div><b>Hành trình ghi nhớ</b><span id="progressText"></span></div>
             <div class="progress-track"><div id="progressBar"></div></div>
-            <small>Cứ từng chữ một, bạn đang tiến bộ mỗi ngày.</small>
+            <small id="progressNote">Tiến độ ghi nhớ theo các cấp độ đang chọn.</small>
           </div>
           <div class="section-title">
             <div>
@@ -114,6 +114,8 @@
               <p>Một chữ ngẫu nhiên dành cho bạn</p>
             </div>
             <div class="section-actions">
+              <label class="hard-mode"><input type="checkbox" id="hardMode" /> Chế độ khó <span>(N2–N1)</span></label>
+              <label class="mode-picker">CHẾ ĐỘ <select id="practiceMode" aria-label="Chế độ luyện tập"><option value="learning">Tất cả chữ chưa thuộc</option><option value="focus">Danh sách đang học</option><option value="review">Ôn chữ đã học</option></select></label>
               <details class="level-picker" id="levelPicker">
                 <summary><span>CẤP ĐỘ</span> <b id="levelSummary">Tất cả cấp độ</b> <span aria-hidden="true">⌄</span></summary>
                 <div class="level-menu" id="levelFilter">
@@ -122,8 +124,8 @@
                   <label><input type="checkbox" value="N5" checked /> N5</label>
                   <label><input type="checkbox" value="N4" checked /> N4</label>
                   <label><input type="checkbox" value="N3" checked /> N3</label>
-                  <label><input type="checkbox" value="N2" checked /> N2</label>
-                  <label><input type="checkbox" value="N1" checked /> N1</label>
+                  <label class="hard-level hidden"><input type="checkbox" value="N2" /> N2</label>
+                  <label class="hard-level hidden"><input type="checkbox" value="N1" /> N1</label>
                   <label><input type="checkbox" value="none" checked /> Chưa phân loại</label>
                 </div>
               </details>
@@ -208,13 +210,14 @@
               <option value="none">Chưa phân loại</option></select
             ><select id="libraryFilter">
               <option value="all">Tất cả trạng thái</option>
-              <option value="learning">Đang học</option>
+              <option value="learning">Chưa thuộc</option>
+              <option value="focus">Danh sách đang học</option>
               <option value="learned">Đã viết được</option></select
             ><button class="secondary" id="exportBtn">
               ↓ &nbsp; Xuất dữ liệu</button
             ><button class="secondary" id="importBtn">
               ↑ &nbsp; Nhập dữ liệu</button
-            ><input
+            ><button class="secondary" type="button" id="trashBtn">♲ &nbsp; Đã xóa gần đây</button><input
               type="file"
               id="importFile"
               accept="application/json,.json"
@@ -230,11 +233,16 @@
             <b>Danh sách chữ</b><span id="listCount"></span>
           </div>
           <div class="library-list" id="libraryList"></div>
+          <div class="library-pagination hidden" id="libraryPagination" aria-label="Điều hướng danh sách">
+            <button class="secondary" type="button" id="libraryPrev">← Trang trước</button>
+            <span id="libraryPageLabel" aria-live="polite"></span>
+            <button class="secondary" type="button" id="libraryNext">Trang sau →</button>
+          </div>
           <div class="library-note">
             ✦ &nbsp; Dữ liệu được lưu trên trình duyệt này. Hãy xuất dữ liệu để
-            sao lưu nhé.<br /><br />Cấp JLPT là mức tham khảo: JLPT không công
+            sao lưu nhé. Tệp sao lưu chỉ chứa chữ trong thư viện; khôi phục chữ đã xóa trước khi xuất nếu bạn muốn lưu chúng.<br /><br />Cấp JLPT là mức tham khảo: JLPT không công
             bố danh sách kanji chính thức. Nghĩa và cách đọc là những mục thông
-            dụng, không phải toàn bộ.<br />N5/N4/N3 theo
+            dụng, không phải toàn bộ.<br />N5–N1 theo
             <a
               href="https://www.kanshudo.com/collections/jlpt_kanji"
               target="_blank"
@@ -248,7 +256,7 @@
               >Kanjiba</a
             >
             và KANJIDIC2 (CC BY-SA 4.0). Nghĩa tiếng Việt từ Kanjiba được dịch
-            có hỗ trợ AI; bạn có thể chỉnh sửa khi cần.
+            có hỗ trợ AI; bạn có thể chỉnh sửa khi cần. Âm Hán Việt quá dài được rút gọn ở thẻ; chọn Sửa trong thư viện để xem đầy đủ.
           </div>
         </section>
       </main>
@@ -305,6 +313,17 @@
         </form>
       </div>
     </div>
+    <div class="modal hidden" id="trashModal" role="dialog" aria-modal="true" aria-labelledby="trashTitle">
+      <div class="modal-box"><div class="modal-head"><div><div class="eyebrow"><span></span> KHÔI PHỤC DỮ LIỆU</div><h2 id="trashTitle">Đã xóa gần đây</h2></div><button class="icon-btn" id="closeTrash" aria-label="Đóng">×</button></div>
+        <p class="modal-description">Các chữ được giữ trên trình duyệt này cho đến khi bạn khôi phục hoặc xóa vĩnh viễn. Hãy tiếp tục xuất dữ liệu để sao lưu.</p><div id="trashList" class="trash-list"></div>
+      </div>
+    </div>
+    <div class="modal hidden" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+      <div class="modal-box"><div class="modal-head"><div><div class="eyebrow"><span></span> NHẬP DỮ LIỆU</div><h2 id="importTitle">Xem trước dữ liệu</h2></div><button class="icon-btn" id="closeImport" aria-label="Đóng">×</button></div>
+        <p class="modal-description" id="importSummary"></p><p class="modal-description">Gộp: giữ nguyên chữ đang có, chỉ thêm chữ mới. Thay thế: dùng hoàn toàn dữ liệu từ tệp. Nên xuất bản sao lưu trước khi thay thế.</p>
+        <div class="modal-actions"><button type="button" class="secondary" id="cancelImport">Hủy</button><button type="button" class="secondary" id="replaceImport">Thay thế</button><button type="button" class="primary" id="mergeImport">Gộp dữ liệu</button></div>
+      </div>
+    </div>
     <div class="modal hidden" id="helpModal">
       <div class="modal-box help-box">
         <div class="modal-head">
@@ -322,8 +341,9 @@
         <p>
           ③ Nếu muốn chuyển chữ vào danh sách đã học, hãy bấm
           <b>Thêm vào danh sách đã học</b>. Muốn ôn lại chữ đã học? Vào
-          <b>Thư viện kanji</b> và chọn <b>Học lại</b>.
+          <b>Thư viện kanji</b> và chọn <b>Học lại</b>; hoặc chọn chế độ <b>Ôn chữ đã học</b> để ôn mà không thay đổi tiến độ.
         </p>
+        <p>④ Sau khi hiện đáp án, bạn có thể thêm chữ vào <b>Danh sách đang học</b>. Chọn chế độ cùng tên để luyện riêng; chữ được chọn vẫn xuất hiện trong lượt luyện tất cả chữ chưa thuộc. Khi đánh dấu đã học, chữ tự rời danh sách này.</p>
         <p class="small-note">
           Hướng dẫn nét sử dụng dữ liệu KanjiVG và cần kết nối internet. Không
           phải chữ nào cũng có dữ liệu.
@@ -331,9 +351,9 @@
         <button class="primary" id="gotIt">Đã hiểu &nbsp; →</button>
       </div>
     </div>
+    <div class="storage-conflict hidden" id="storageConflict" role="alert">Dữ liệu đã thay đổi ở tab khác. Để tránh ghi đè, hãy tải lại tab này. <button type="button" id="reloadData">Tải lại</button></div>
     <div id="toast"></div>
-    <script src="kanshudo-data.js"></script>
-    <script src="app.js"></script>
-  <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a57dfb00cf8f49dd',t:'MTc5NDIzOTUwMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a57dfb00cf8f49dd',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","spa":2}' crossorigin="anonymous"></script>
-</body>
+    <script src="kanshudo-data.js?v=20261116-4"></script>
+    <script src="app.js?v=20261116-4"></script>
+  </body>
 </html>
